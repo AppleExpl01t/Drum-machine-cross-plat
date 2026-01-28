@@ -1,0 +1,10 @@
+{
+  "appId": "com.geministudio.app",
+  "appName": "FreakGen Drum machine",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}

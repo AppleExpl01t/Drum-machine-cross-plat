@@ -1,0 +1,5 @@
+        Info Using Android Studio's default Java installation: C:\Program Files\Android\Android Studio\jbr
+        Info ANDROID_HOME not set, trying to locate Android SDK...
+        Info Using installed Android SDK: C:\Users\frank\AppData\Local\Android/Sdk
+failed to ensure Android environment: Skipping Android Studio NDK installation. Please go through the manual setup process described in the documentation: https://tauri.app/start/prerequisites/#android
+       Error failed to ensure Android environment: Skipping Android Studio NDK installation. Please go through the manual setup process described in the documentation: https://tauri.app/start/prerequisites/#android

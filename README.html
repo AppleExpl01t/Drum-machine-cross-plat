@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Studio - Documentation</title>
+    <style>
+        :root {
+            --bg: #050508;
+            --panel: rgba(20, 20, 25, 0.7);
+            --surface: rgba(30, 30, 35, 0.4);
+            --primary: #ff5722;
+            --accent: #ffab00;
+            --text-main: #ffffff;
+            --text-dim: #888899;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glow-primary: 0 0 10px rgba(255, 87, 34, 0.4);
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: "Inter", system-ui, sans-serif;
+            margin: 0;
+            background: radial-gradient(circle at 50% 0%, #1a1005 0%, var(--bg) 60%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0c; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        .app-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-bottom: 50px;
+        }
+
+        .top-bar {
+            height: 60px;
+            background: rgba(10, 10, 12, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: var(--primary);
+            font-size: 16px;
+            text-shadow: 0 0 8px rgba(255, 87, 34, 0.4);
+            text-transform: uppercase;
+        }
+
+        .status-badge {
+            background: rgba(255, 87, 34, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(255, 87, 34, 0.3);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            box-shadow: var(--glow-primary);
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 0 20px;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(20px); }
+        }
+
+        .glass-panel {
+            background: var(--panel);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0 0 20px 0;
+            background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: var(--primary);
+            margin: 0 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h3 {
+            font-size: 16px;
+            color: var(--accent);
+            margin: 25px 0 10px 0;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            padding-left: 20px;
+            color: #ccc;
+        }
+        li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        a:hover {
+            border-bottom-color: var(--accent);
+            text-shadow: 0 0 8px rgba(255, 171, 0, 0.4);
+        }
+
+        code {
+            font-family: 'Consolas', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #e0e0e0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin: 15px 0;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            border: none;
+            color: #a5d6ff;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 10px 20px;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-block;
+            margin-top: 10px;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .directory-tree {
+            font-family: monospace;
+            color: var(--text-dim);
+        }
+        .directory-tree .folder { color: var(--accent); font-weight: bold; }
+        .directory-tree .file { color: #ccc; }
+    </style>
+</head>
+<body>
+
+    <div class="grid-bg"></div>
+
+    <div class="top-bar">
+        <div class="logo">Gemini Studio <span style="color: #fff; opacity: 0.5;">Docs</span></div>
+        <div class="status-badge">v3.9.7</div>
+    </div>
+
+    <div class="app-container">
+        
+        <!-- INTRO -->
+        <div class="section" style="animation-delay: 0.1s;">
+            <div class="glass-panel">
+                <h1>Gemini Studio Drum Machine</h1>
+                <p>Welcome to the <strong>Gemini Studio Drum Machine</strong> project! This interactive guide is designed to help new developers—even beginners—get started with contributing to this application working alongside an AI Agentic IDE.</p>
+                
+                <div style="display: flex; gap: 15px; margin-top: 20px;">
+                    <div style="flex: 1; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px;">
+                        <span style="color: var(--primary); font-weight: bold;">Frontend</span><br>
+                        React + Vite
+                    </div>
+                    <div style="flex: 1; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px;">
+                        <span style="color: var(--primary); font-weight: bold;">State</span><br>
+                        Zustand
+                    </div>
+                    <div style="flex: 1; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px;">
+                        <span style="color: var(--primary); font-weight: bold;">Native</span><br>
+                        Tauri (Rust)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREREQUISITES -->
+        <div class="section" style="animation-delay: 0.2s;">
+            <div class="glass-panel">
+                <h2>🛠️ Prerequisites</h2>
+                <p>Before you start, ensure you have the following installed:</p>
+                <ul>
+                    <li><strong>Node.js</strong>: The runtime for the web frontend. <a href="https://nodejs.org/" target="_blank">Download LTS</a></li>
+                    <li><strong>Rust</strong>: Required for Tauri. <a href="https://www.rust-lang.org/tools/install" target="_blank">Install Rust</a></li>
+                    <li><strong>Android Studio</strong>: Required for Android builds. <a href="https://developer.android.com/studio" target="_blank">Download</a></li>
+                </ul>
+                <div style="background: rgba(255, 171, 0, 0.1); border-left: 3px solid var(--accent); padding: 10px; border-radius: 0 4px 4px 0;">
+                    <strong>Tip:</strong> Ensure you set your <code>JAVA_HOME</code> environment variable to the Android Studio JRE.<br>
+                    <code style="font-size: 11px; display: block; margin-top: 5px;">C:\Program Files\Android\Android Studio\jbr</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- GETTING STARTED -->
+        <div class="section" style="animation-delay: 0.3s;">
+            <div class="glass-panel">
+                <h2>⚡ Getting Started</h2>
+                
+                <h3>1. Installation</h3>
+                <p>Open your terminal in the project root and run:</p>
+                <pre><code>npm install</code></pre>
+                
+                <h3>2. Development Mode</h3>
+                <p>To start the app on your desktop:</p>
+                <pre><code>npm run tauri dev</code></pre>
+                
+                <h3>3. Android Dev</h3>
+                <p>Connect your Android device (USB Debugging ON) or start Emulator:</p>
+                <pre><code>npm run tauri android dev</code></pre>
+            </div>
+        </div>
+
+        <!-- STRUCTURE -->
+        <div class="section" style="animation-delay: 0.4s;">
+            <div class="glass-panel">
+                <h2>📂 Project Structure</h2>
+                <div class="directory-tree">
+                    <div><span class="folder">src/</span> <span style="opacity: 0.5;">// The Frontend</span></div>
+                    <div style="padding-left: 20px;">
+                        <div><span class="folder">components/</span> <span class="file">- UI elements (Grid.jsx, Controls.jsx)</span></div>
+                        <div><span class="folder">store/</span> <span class="file">- State (useSequencerStore.js)</span></div>
+                        <div><span class="folder">audio/</span> <span class="file">- Logic (AudioEngine.js)</span></div>
+                        <div><span class="folder">utils/</span> <span class="file">- Helpers (storage.js)</span></div>
+                        <div><span class="file">App.jsx</span> <span class="file">- Main Entry</span></div>
+                    </div>
+                    <br>
+                    <div><span class="folder">src-tauri/</span> <span style="opacity: 0.5;">// The Native Layer</span></div>
+                    <div style="padding-left: 20px;">
+                        <div><span class="folder">src/lib.rs</span> <span class="file">- Rust Entry Point</span></div>
+                        <div><span class="folder">gen/android/</span> <span class="file">- Android Project Files</span></div>
+                        <div><span class="file">tauri.conf.json</span> <span class="file">- Config</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI AGENT TIPS -->
+        <div class="section" style="animation-delay: 0.5s;">
+            <div class="glass-panel" style="border-color: rgba(255, 87, 34, 0.3);">
+                <h2>🤖 Working with the AI Agent</h2>
+                <p>This project is optimized for AI-assisted development. Use these patterns for best results:</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h3>✅ Good Requests</h3>
+                        <ul>
+                            <li>"Refactor <code>Grid.jsx</code> to use <code>useSequencerStore</code>."</li>
+                            <li>"Fix the bug where the sequencer doesn't save."</li>
+                            <li>"Style the play button to be green."</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>❌ Bad Requests</h3>
+                        <ul>
+                            <li>"Fix the bug." (Too vague)</li>
+                            <li>"Change the code." (No context)</li>
+                            <li>"Read node_modules." (Wasteful)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BUILDING -->
+        <div class="section" style="animation-delay: 0.6s;">
+            <div class="glass-panel">
+                <h2>📦 Building for Release</h2>
+                
+                <h3>Android Release</h3>
+                <ol>
+                    <li>
+                        <strong>Generate Keystore</strong> (One time):
+                        <pre><code>cd src-tauri/gen/android
+./gradlew :app:generateReleaseKeystore</code></pre>
+                    </li>
+                    <li>
+                        <strong>Build APK</strong>:
+                        <pre><code>npm run tauri android build</code></pre>
+                        <p style="font-size: 12px; opacity: 0.7;">Output: <code>src-tauri/gen/android/app/build/outputs/apk/universal/release/</code></p>
+                    </li>
+                </ol>
+
+                <h3>Desktop Release</h3>
+                <pre><code>npm run tauri build</code></pre>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Simple interaction to make it feel alive
+        document.querySelectorAll('pre').forEach(block => {
+            block.addEventListener('click', () => {
+                const code = block.querySelector('code').innerText;
+                navigator.clipboard.writeText(code);
+                
+                // Visual feedback
+                const originalBg = block.style.background;
+                block.style.background = 'rgba(255, 87, 34, 0.2)';
+                setTimeout(() => {
+                    block.style.background = originalBg;
+                }, 200);
+            });
+            block.title = "Click to copy";
+            block.style.cursor = "pointer";
+        });
+    </script>
+</body>
+</html>

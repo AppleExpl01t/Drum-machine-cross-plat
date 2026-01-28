@@ -1,0 +1,52 @@
+﻿
+> Configure project :app
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+
+> Configure project :capacitor-cordova-android-plugins
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+.\gradlew.bat : 
+At line:1 char:1
++ .\gradlew.bat clean 
+> build_error.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (:String) [   
+ ], RemoteExceptio    
+n
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+FAILURE: Build failed 
+with an exception.
+
+* What went wrong:
+A problem occurred 
+configuring project ':
+capacitor-filesystem'.
+> java.util.concurrent
+.ExecutionException: o
+rg.gradle.api.GradleEx
+ception: Failed to 
+create Jar file C:\Use
+rs\jac15\.gradle\cache
+s\jars-9\18366b31678c0
+171857be093a3b8ec22\bc
+prov-jdk18on-1.79.jar.
+
+* Try:
+> Run with 
+--stacktrace option 
+to get the stack 
+trace.
+> Run with --info or 
+--debug option to get 
+more log output.
+> Run with --scan to 
+get full insights.
+> Get more help at htt
+ps://help.gradle.org.
+
+BUILD FAILED in 1s

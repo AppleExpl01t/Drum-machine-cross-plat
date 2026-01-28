@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gemini Studio v3.4 (Architect)</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --panel: #141414;
+            --surface: #1f1f1f;
+            --primary: #00bcd4; /* Cyan */
+            --accent: #d500f9; /* Purple */
+            --highlight: #ffffff;
+            --lock: #ff3d00;
+            --text-main: #e0e0e0;
+            --text-dim: #888;
+            --grid-line: #333;
+            --grid-beat: #444;
+            --border: #333;
+            --thumb: #555;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-size: 13px;
+        }
+
+        /* --- LAYOUT UTILS --- */
+        .flex { display: flex; }
+        .col { flex-direction: column; }
+        .center { align-items: center; justify-content: center; }
+        .between { justify-content: space-between; }
+        .gap-10 { gap: 10px; }
+        .gap-5 { gap: 5px; }
+        .p-10 { padding: 10px; }
+        .w-full { width: 100%; }
+        
+        button { user-select: none; }
+
+        /* --- MAIN STUDIO WRAPPER --- */
+        .studio {
+            background-color: var(--panel);
+            width: 98vw;
+            height: 96vh;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            display: grid;
+            grid-template-rows: auto auto 1fr auto; /* Header, Controls, Grid, Footer */
+            box-shadow: 0 0 80px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        /* --- TOP BAR --- */
+        .top-bar {
+            height: 40px;
+            border-bottom: 1px solid var(--border);
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #111;
+        }
+        .logo { 
+            font-weight: 900; 
+            letter-spacing: 3px; 
+            color: var(--primary); 
+            font-size: 14px; 
+            text-shadow: 0 0 10px rgba(0,229,255,0.3);
+        }
+
+        /* --- CONTROL DECK --- */
+        .controls {
+            padding: 10px 15px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* Control Groups */
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #181818;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid #2a2a2a;
+        }
+        .control-label {
+            font-size: 10px;
+            color: var(--text-dim);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        /* Buttons */
+        .btn {
+            background: #2a2a2a;
+            border: none;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: 0.1s;
+        }
+        .btn:hover { background: #3a3a3a; }
+        .btn:active { transform: translateY(1px); }
+        
+        .btn-primary { background: var(--primary); color: #000; }
+        .btn-primary:hover { background: #b2ebf2; }
+        
+        .btn-danger { background: #2a2a2a; border: 1px solid #c62828; color: #c62828; }
+        .btn-danger:hover { background: #c62828; color: #fff; }
+
+        .btn-generate {
+            background: linear-gradient(135deg, var(--accent), #6200ea);
+            color: white;
+            box-shadow: 0 2px 10px rgba(101, 31, 255, 0.3);
+        }
+
+        .btn-icon { width: 30px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+        /* Inputs */
+        input[type=number], select {
+            background: #111;
+            border: 1px solid #333;
+            color: white;
+            padding: 4px;
+            border-radius: 2px;
+            font-family: inherit;
+            font-size: 11px;
+            outline: none;
+        }
+        input[type=number]:focus, select:focus { border-color: var(--primary); }
+
+        /* Range Sliders (Knobs represented as sliders for web ease) */
+        .slider-control { display: flex; flex-direction: column; width: 70px; }
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; height: 3px; background: #333; outline: none; margin-top: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; cursor: pointer;
+        }
+
+        /* --- WORKSPACE (The Grid) --- */
+        .workspace {
+            display: flex;
+            overflow: hidden; /* Manage scroll internally */
+            position: relative;
+            background: #0d0d0d;
+        }
+
+        /* Left Sidebar - Track Headers */
+        .mt-header { height: 30px; background: #1a1a1a; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+        .sidebar {
+            width: 180px;
+            flex-shrink: 0;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        .track-header {
+            height: 48px; /* Fixed height match */
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            border-bottom: 1px solid #222;
+            background: #181818;
+            gap: 8px;
+        }
+        .track-name { font-size: 11px; font-weight: 600; color: #ccc; flex-grow: 1; }
+        .track-lock { color: #444; cursor: pointer; font-size: 12px; }
+        .track-lock.active { color: var(--lock); }
+        .track-mute, .track-solo { 
+            width: 18px; height: 18px; 
+            font-size: 9px; 
+            border: 1px solid #333; 
+            color: #555; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; 
+            border-radius: 2px;
+        }
+        .track-mute.active { background: #d32f2f; color: white; border-color: #d32f2f; }
+        .track-solo.active { background: #fbc02d; color: black; border-color: #fbc02d; }
+
+        /* Right Side - Sequencer Grid */
+        .grid-container {
+            flex-grow: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: #111;
+        }
+        
+        /* Ruler */
+        .ruler {
+            height: 30px;
+            display: flex;
+            background: #222;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .measure-mark {
+            position: absolute;
+            height: 100%;
+            border-left: 1px solid #555;
+            padding-left: 5px;
+            font-size: 10px;
+            color: #888;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .beat-mark {
+            position: absolute;
+            height: 10px;
+            bottom: 0;
+            border-left: 1px solid #333;
+        }
+
+        /* The Grid Rows */
+        .grid-scroll-area {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        .grid-row {
+            height: 48px;
+            border-bottom: 1px solid #222;
+            position: relative;
+            background: #111;
+            /* width set dynamically by JS */
+        }
+        
+        /* Grid Lines Background */
+        .grid-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            pointer-events: none;
+        }
+        .bg-step {
+            flex: 1;
+            border-right: 1px solid #1a1a1a;
+        }
+        .bg-step:nth-child(4n) { border-right: 1px solid #2a2a2a; background: rgba(255,255,255,0.01); } 
+        .bg-step:nth-child(16n) { border-right: 1px solid #444; }
+
+        /* Steps */
+        .step-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+        }
+        .step-btn {
+            flex: 1;
+            height: 60%;
+            margin: 0 1px;
+            background: #1a1a1a;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+            transition: 0.05s;
+        }
+        .step-btn:hover { background: #252525; }
+        
+        .step-btn.active { background: var(--step-color, #00BCD4); box-shadow: 0 0 5px var(--step-color); opacity: 0.8; }
+        .step-btn.selected { border: 2px solid white; z-index: 5; opacity: 1; }
+        .step-btn.playing { background: #fff !important; opacity: 1 !important; transform: scale(1.1); z-index: 10; boxShadow: 0 0 10px #fff; }
+
+        /* Step Colors */
+        .color-kick { --step-color: #ff5252; }
+        .color-snare { --step-color: #ffab40; }
+        .color-perc { --step-color: #00bcd4; }
+        .color-hat { --step-color: #fab1a0; }
+        .color-bass { --step-color: #7c4dff; }
+        .color-chord { --step-color: #e040fb; }
+
+        /* PROPERTY PANEL (Footer) */
+        .property-panel {
+            height: 80px;
+            background: #161616;
+            border-top: 1px solid var(--border);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        .prop-group { display: flex; gap: 15px; align-items: center; opacity: 0.3; pointer-events: none; transition: 0.2s; }
+        .prop-group.enabled { opacity: 1; pointer-events: all; }
+        
+        .prop-item { display: flex; flex-direction: column; gap: 5px; }
+        .prop-val { font-family: monospace; color: var(--primary); font-size: 11px; }
+
+        /* PLAYHEAD */
+        #playhead {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            pointer-events: none;
+            z-index: 20;
+            display: none;
+        }
+
+        /* OVERLAY */
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 999;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .big-btn { padding: 15px 40px; font-size: 18px; letter-spacing: 2px; font-weight: bold; background: var(--primary); border: none; cursor: pointer; }
+
+    </style>
+</head>
+<body>
+
+<div id="overlay">
+    <div style="margin-bottom:20px; color:#666; font-family:monospace">GEMINI STUDIO v3.4 ARCHITECT</div>
+    <button class="big-btn" id="startBtn">INITIALIZE SYSTEM</button>
+</div>
+
+<div class="studio">
+    <!-- 1. TOP BAR -->
+    <div class="top-bar">
+        <div class="logo">GEMINI STUDIO <span style="font-size:0.7em; color:#666; margin-left:5px">v3.4</span></div>
+        <div style="display:flex; gap:10px; font-size:11px; color:#555">
+            <span id="cpuUsage">CPU: 0%</span>
+            <span>MEM: <span id="memUsage">12</span>MB</span>
+        </div>
+    </div>
+
+    <!-- 2. CONTROLS -->
+    <div class="controls">
+        <div class="control-group">
+            <button class="btn btn-primary" id="playBtn">▶ PLAY</button>
+            <button class="btn" id="stopBtn">■</button>
+        </div>
+
+        <div class="control-group">
+            <button class="btn btn-icon" id="undoBtn">↩</button>
+            <button class="btn btn-icon" id="redoBtn">↪</button>
+        </div>
+
+        <div class="control-group">
+            <div class="slider-control">
+                <div style="display:flex; justify-content:space-between">
+                    <span class="control-label">BPM</span>
+                    <span class="control-label" style="color:var(--primary)" id="bpmVal">124</span>
+                </div>
+                <input type="range" id="bpmInput" min="60" max="200" value="124">
+            </div>
+            <div class="slider-control" style="width:50px; align-items:center; justify-content:center">
+                <span class="control-label" style="margin-bottom:5px">LOCK</span>
+                <input type="checkbox" id="bpmLock">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="prop-item">
+                <span class="control-label">STEPS</span>
+                <select id="stepsSelect">
+                    <option value="16">16</option>
+                    <option value="32" selected>32</option>
+                    <option value="64">64</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="slider-control">
+                <div style="display:flex; justify-content:space-between">
+                    <span class="control-label">SWING</span>
+                    <span class="control-label" style="color:var(--accent)" id="swingDisplay">0%</span>
+                </div>
+                <input type="range" id="swingInput" min="0" max="80" value="0">
+            </div>
+            <div class="slider-control">
+                <div style="display:flex; justify-content:space-between">
+                    <span class="control-label">HUMANIZE</span>
+                    <span class="control-label" style="color:#aaa" id="humanizeDisplay">10%</span>
+                </div>
+                <input type="range" id="humanizeInput" min="0" max="100" value="10">
+            </div>
+        </div>
+
+        <div class="control-group" style="margin-left:auto">
+            <div class="prop-item">
+                <span class="control-label">GENRE</span>
+                <select id="genreSelect">
+                    <option value="house">House</option>
+                    <option value="dnb">Drum & Bass</option>
+                    <option value="lofi">Lo-Fi / Chill</option>
+                    <option value="hiphop">Hip Hop</option>
+                    <option value="techno">Techno</option>
+                </select>
+            </div>
+             <div class="prop-item">
+                <span class="control-label">KIT</span>
+                <select id="kitSelect" style="width: 100px"></select>
+            </div>
+            <button class="btn btn-generate" id="genBtn">GENERATE</button>
+        </div>
+    </div>
+
+    <!-- 3. WORKSPACE -->
+    <div class="workspace">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="mt-header"></div> <!-- Spacer for ruler -->
+            <div id="trackHeaders">
+                <!-- Track headers injected here -->
+            </div>
+        </div>
+
+        <!-- Scrollable Grid -->
+        <div class="grid-container" id="gridContainer">
+            <div class="ruler" id="ruler">
+                <!-- Ruler markings injected here -->
+            </div>
+            <div id="gridRows" class="grid-scroll-area">
+                <!-- Rows injected here -->
+                <div id="playhead"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. PROPERTY PANEL -->
+    <div class="property-panel" id="propPanel">
+        <div style="color:#444; font-weight:bold; font-size:16px; margin-right:20px;">STEP PROPERTIES</div>
+        
+        <div class="prop-group" id="stepProps">
+            <div class="prop-item">
+                <span class="control-label">VELOCITY</span>
+                <input type="range" id="stepVel" min="0" max="1" step="0.05" value="0.8">
+                <span class="prop-val" id="valVel">0.8</span>
+            </div>
+            <div class="prop-item">
+                <span class="control-label">PITCH OFFSET</span>
+                <input type="range" id="stepPitch" min="-12" max="12" step="1" value="0">
+                <span class="prop-val" id="valPitch">0</span>
+            </div>
+            <div class="prop-item">
+                <span class="control-label">PROBABILITY</span>
+                <input type="range" id="stepProb" min="0" max="1" step="0.1" value="1">
+                <span class="prop-val" id="valProb">100%</span>
+            </div>
+            <button class="btn btn-danger" id="btnDeleteStep" style="margin-top:15px; margin-left:10px;">DELETE STEP</button>
+        </div>
+        <div style="flex-grow:1; text-align:right; color:#333; font-style:italic">
+            Select a step to edit parameters
+        </div>
+    </div>
+</div>
+
+<script>
+    /* --- CORE ENGINE & CONFIG --- */
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const tracks = [
+        { id: 'kick', label: 'KICK', class: 'color-kick' },
+        { id: 'snare', label: 'SNARE', class: 'color-snare' },
+        { id: 'clap', label: 'CLAP', class: 'color-perc' },
+        { id: 'hatC', label: 'HAT (CL)', class: 'color-hat' },
+        { id: 'hatO', label: 'HAT (OP)', class: 'color-hat' },
+        { id: 'tomL', label: 'TOM LO', class: 'color-perc' },
+        { id: 'tomH', label: 'TOM HI', class: 'color-perc' },
+        { id: 'crash', label: 'CRASH', class: 'color-perc' },
+        { id: 'perc', label: 'PERC', class: 'color-perc' },
+        { id: 'bass', label: 'BASS', class: 'color-bass' },
+        { id: 'chord', label: 'CHORD', class: 'color-chord' }
+    ];
+
+    const KITS = {
+        house: ['TR-909', 'TR-808', 'Classic'],
+        dnb: ['Jungle', 'Neuro', 'Liquid'],
+        lofi: ['Dusty Vinyl', 'Chillhop', 'Bedroom'],
+        hiphop: ['MPC-60', 'Trap', 'BoomBap'],
+        techno: ['Rumble', 'Industrial', 'Minimal']
+    };
+
+    // State
+    const STATE = {
+        zoom: 30, // px per step
+        steps: 32,
+        bpm: 124,
+        playing: false,
+        currentStep: 0,
+        nextNoteTime: 0,
+        pattern: {}, // { trackId: [ {vel:1, pitch:0, prob:1} | null, ... ] }
+        muted: {}, // { trackId: bool }
+        soloed: null, // trackId or null
+        locked: {},
+        selectedStep: null, // { trackId, stepIndex }
+        swing: 0, // 0 - 0.5 (representing 0-50% swing delay)
+        humanize: 0.1
+    };
+
+    // Initialize Pattern
+    tracks.forEach(t => {
+        STATE.pattern[t.id] = new Array(64).fill(null);
+        STATE.muted[t.id] = false;
+        STATE.locked[t.id] = false;
+    });
+
+    let timerID;
+
+    /* --- AUDIO SYNTHESIS --- */
+    
+    // Noise Buffer Cache
+    const NOISE = {};
+    function getNoise(type='white') {
+        if(NOISE[type]) return NOISE[type];
+        const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for(let i=0; i<data.length; i++) {
+            data[i] = type==='white' ? Math.random() * 2 - 1 : (Math.random() + Math.random()) - 1; // Simplistic
+        }
+        NOISE[type] = buf;
+        return buf;
+    }
+
+    function playSound(track, time, stepData) {
+        if(Math.random() > stepData.prob) return; // Probability check
+
+        const kit = document.getElementById('kitSelect').value.toLowerCase();
+        const isLofi = document.getElementById('genreSelect').value === 'lofi';
+        
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        // Apply Velocity
+        const vel = stepData.vel * (1 - (Math.random() * STATE.humanize * 0.3));
+        
+        // --- INSTRUMENTS ---
+        
+        if (track === 'kick') {
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.frequency.setValueAtTime(isLofi ? 100 : 150, time);
+            osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.5);
+            
+            gain.gain.setValueAtTime(vel, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.5);
+            
+            osc.start(time); osc.stop(time + 0.5);
+        }
+        
+        else if (track === 'snare') {
+            // Noise Layer
+            const noise = ctx.createBufferSource();
+            noise.buffer = getNoise();
+            const nFilter = ctx.createBiquadFilter();
+            nFilter.type = isLofi ? 'lowpass' : 'highpass';
+            nFilter.frequency.value = isLofi ? 3000 : 1000;
+            
+            noise.connect(nFilter); nFilter.connect(gain); gain.connect(ctx.destination);
+            
+            gain.gain.setValueAtTime(vel, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + (isLofi ? 0.1 : 0.2));
+            noise.start(time); noise.stop(time + 0.3);
+            
+            // Body Layer
+            const body = ctx.createOscillator();
+            body.type = 'triangle';
+            const bGain = ctx.createGain();
+            body.connect(bGain); bGain.connect(ctx.destination);
+            body.frequency.setValueAtTime(180, time);
+            bGain.gain.setValueAtTime(vel * 0.5, time);
+            bGain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+            body.start(time); body.stop(time+0.1);
+        }
+        
+        else if (track.includes('hat') || track === 'crash') {
+            const noise = ctx.createBufferSource();
+            noise.buffer = getNoise();
+            const nFilter = ctx.createBiquadFilter();
+            nFilter.type = 'highpass';
+            nFilter.frequency.value = isLofi ? 4000 : 7000;
+            
+            noise.connect(nFilter); nFilter.connect(gain); gain.connect(ctx.destination);
+            
+            const dura = track==='hatO' ? 0.4 : (track==='crash' ? 1.2 : 0.05);
+            gain.gain.setValueAtTime(vel * (track==='crash'?0.6:0.8), time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + dura);
+            
+            noise.start(time); noise.stop(time + dura + 0.1);
+        }
+        
+        else if (track === 'bass') {
+            osc.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+            osc.type = isLofi ? 'sine' : 'sawtooth';
+            
+            const freq = 55 * Math.pow(2, stepData.pitch/12); // A1 base at 0 pitch
+            osc.frequency.setValueAtTime(freq, time);
+            
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(200, time);
+            if(!isLofi) filter.frequency.linearRampToValueAtTime(1000, time+0.1);
+            
+            gain.gain.setValueAtTime(vel, time);
+            gain.gain.linearRampToValueAtTime(0, time + 0.3);
+            
+            osc.start(time); osc.stop(time + 0.3);
+        }
+
+        else {
+            // General Percs
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(200, time);
+            osc.frequency.exponentialRampToValueAtTime(50, time + 0.1);
+            gain.gain.setValueAtTime(vel, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time+0.1);
+            osc.start(time); osc.stop(time+0.1);
+        }
+    }
+
+
+    /* --- SCHEDULER & TIMELINE --- */
+
+    function nextStep() {
+        // Calculate next time
+        const secsPerBeat = 60.0 / STATE.bpm;
+        const stepTime = secsPerBeat / 4; // 16th notes
+        
+        STATE.nextNoteTime += stepTime;
+        STATE.currentStep = (STATE.currentStep + 1) % STATE.steps;
+    }
+
+    function scheduleNotes() {
+        const lookahead = 25.0; // ms
+        const scheduleAheadTime = 0.1; // sec
+
+        while (STATE.nextNoteTime < ctx.currentTime + scheduleAheadTime) {
+            
+            // UI Follow logic
+            const currentDrawStep = STATE.currentStep;
+            requestAnimationFrame(() => updatePlayhead(currentDrawStep));
+
+            // Humanize & Swing Calculation
+            let playTime = STATE.nextNoteTime;
+            
+            // Swing (delay even 16ths)
+            if (STATE.currentStep % 2 !== 0) {
+                const secsPerBeat = 60.0 / STATE.bpm;
+                playTime += (STATE.swing * (secsPerBeat/4)); 
+            }
+            
+            // Humanize (random micro-offset +/- 10ms)
+            if (STATE.humanize > 0) {
+                playTime += (Math.random() - 0.5) * (STATE.humanize * 0.02);
+            }
+
+            // Play Tracks
+            tracks.forEach(track => {
+                const note = STATE.pattern[track.id][STATE.currentStep];
+                if (note) {
+                    // Mute logic
+                    if (STATE.muted[track.id]) return;
+                    if (STATE.soloed && STATE.soloed !== track.id) return;
+                    
+                    playSound(track.id, playTime, note);
+                }
+            });
+
+            nextStep();
+        }
+        
+        if (STATE.playing) {
+            timerID = setTimeout(scheduleNotes, lookahead);
+        }
+    }
+
+    function startPlayback() {
+        if (STATE.playing) return;
+        if (ctx.state === 'suspended') ctx.resume();
+        
+        STATE.playing = true;
+        STATE.currentStep = 0;
+        STATE.nextNoteTime = ctx.currentTime + 0.1;
+        scheduleNotes();
+    }
+
+    function stopPlayback() {
+        STATE.playing = false;
+        clearTimeout(timerID);
+        // Reset playhead visuals
+        document.querySelectorAll('.step-btn.playing').forEach(e => e.classList.remove('playing'));
+    }
+
+    function updatePlayhead(step) {
+        // Visual highlight of active column
+        document.querySelectorAll('.step-btn.playing').forEach(e => e.classList.remove('playing'));
+        const activeSteps = document.querySelectorAll(`[data-col="${step}"]`);
+        activeSteps.forEach(s => s.classList.add('playing'));
+
+        // Scroll Logic: Ensure playhead is visible
+        const container = document.getElementById('gridContainer');
+        const stepWidth = container.querySelector('.bg-step').offsetWidth; 
+        const playheadX = step * stepWidth;
+        
+        const viewStart = container.scrollLeft;
+        const viewEnd = viewStart + container.clientWidth;
+        
+        // Margin for comfort
+        if (playheadX > viewEnd - 100) {
+            container.scroll({ left: playheadX - 100, behavior: 'smooth' });
+        } else if (playheadX < viewStart) {
+            container.scroll({ left: playheadX - 20, behavior: 'smooth' });
+        }
+    }
+
+
+    /* --- UI GENERATION --- */
+
+    function renderUI() {
+        // 1. Sidebar Headers
+        const headerContainer = document.getElementById('trackHeaders');
+        headerContainer.innerHTML = '';
+        tracks.forEach(t => {
+            const h = document.createElement('div');
+            h.className = 'track-header';
+            h.innerHTML = `
+                <div class="track-mute ${STATE.muted[t.id]?'active':''}" onclick="toggleMute('${t.id}')">M</div>
+                <div class="track-solo ${STATE.soloed===t.id?'active':''}" onclick="toggleSolo('${t.id}')">S</div>
+                <div class="track-name">${t.label}</div>
+                <div class="track-lock ${STATE.locked[t.id]?'active':''}" onclick="toggleLock('${t.id}')">🔒</div>
+            `;
+            headerContainer.appendChild(h);
+        });
+
+        // 2. Grid & Ruler
+        const ruler = document.getElementById('ruler');
+        const rowsContainer = document.getElementById('gridRows');
+        ruler.innerHTML = '';
+        rowsContainer.innerHTML = '';
+
+        // Calculate total width based on steps
+        // Allow CSS grid to handle width 100% per step
+        // To make it scrollable, we force a min-width on grid-scroll-area children
+        const STEP_W = 30;
+        const TOTAL_W = STATE.steps * STEP_W;
+        
+        // Ruler Marks
+        for(let i=0; i<STATE.steps; i++) {
+            const isBeat = i % 4 === 0;
+            if (isBeat) {
+                const mark = document.createElement('div');
+                mark.className = 'measure-mark';
+                mark.style.left = (i * STEP_W) + 'px';
+                mark.style.width = (STEP_W * 4) + 'px';
+                // Measure Number (1-based)
+                const measure = Math.floor(i/16) + 1;
+                const beat = (i % 16) / 4 + 1;
+                mark.innerText = (i%16===0) ? measure : `${measure}.${beat}`;
+                if(i%16===0) { mark.style.borderLeft = "2px solid #888"; mark.style.color="white"; }
+                ruler.appendChild(mark);
+            } else {
+                 // 8th note ticks? User asked for 1/8th lines. 
+                 // Our grid is 1/16th. odd steps are offs. even steps are 8ths.
+                 if (i % 2 === 0) {
+                     const tick = document.createElement('div');
+                     tick.className = 'beat-mark';
+                     tick.style.left = (i * STEP_W) + 'px';
+                     ruler.appendChild(tick);
+                 }
+            }
+        }
+
+        // Grid Rows
+        tracks.forEach(t => {
+            const row = document.createElement('div');
+            row.className = 'grid-row';
+            row.style.width = TOTAL_W + 'px';
+
+            // Background Lines
+            const bg = document.createElement('div');
+            bg.className = 'grid-bg';
+            for (let i=0; i<STATE.steps; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'bg-step';
+                bg.appendChild(cell);
+            }
+            row.appendChild(bg);
+
+            // Step Buttons
+            const layer = document.createElement('div');
+            layer.className = 'step-layer';
+            
+            for (let i=0; i<STATE.steps; i++) {
+                const btn = document.createElement('div');
+                btn.className = `step-btn ${t.class}`;
+                btn.dataset.track = t.id;
+                btn.dataset.step = i;
+                btn.dataset.col = i;
+
+                // State Classes
+                const note = STATE.pattern[t.id][i];
+                if (note) btn.classList.add('active');
+                if (STATE.selectedStep && STATE.selectedStep.trackId === t.id && STATE.selectedStep.stepIndex === i) {
+                    btn.classList.add('selected');
+                }
+
+                // Interactions
+                btn.onclick = (e) => handleStepClick(t.id, i, e);
+                
+                layer.appendChild(btn);
+            }
+            row.appendChild(layer);
+            rowsContainer.appendChild(row);
+        });
+        
+        // Set container widths
+        ruler.style.width = TOTAL_W + 'px';
+    }
+
+
+    /* --- LOGIC HANDLERS --- */
+
+    function handleStepClick(trackId, stepIndex, event) {
+        const existing = STATE.pattern[trackId][stepIndex];
+        
+        // If clicking an existing note -> Select it
+        if (existing) {
+            if (isSelected(trackId, stepIndex)) {
+                // Deselect if already selected (or maybe delete? User preference. Let's toggle selection)
+                selectStep(null);
+            } else {
+                selectStep(trackId, stepIndex);
+            }
+        } else {
+            // Create new note -> default vals
+            STATE.pattern[trackId][stepIndex] = { vel: 0.8, pitch: 0, prob: 1.0 };
+            selectStep(trackId, stepIndex);
+            // Play preview sound
+            // playSound(trackId, ctx.currentTime, STATE.pattern[trackId][stepIndex]);
+        }
+        renderUI(); // Re-render to show selection/active state
+    }
+
+    function selectStep(trackId, stepIndex) {
+        if (trackId === null) {
+            STATE.selectedStep = null;
+            document.getElementById('stepProps').classList.remove('enabled');
+            return;
+        }
+        STATE.selectedStep = { trackId, stepIndex };
+        document.getElementById('stepProps').classList.add('enabled');
+
+        // Populate values
+        const data = STATE.pattern[trackId][stepIndex];
+        if (data) {
+            document.getElementById('stepVel').value = data.vel;
+            document.getElementById('valVel').innerText = data.vel.toFixed(2);
+            document.getElementById('stepPitch').value = data.pitch;
+            document.getElementById('valPitch').innerText = data.pitch;
+            document.getElementById('stepProb').value = data.prob;
+            document.getElementById('valProb').innerText = Math.round(data.prob * 100) + '%';
+        }
+    }
+    
+    // Check if step is selected
+    function isSelected(tid, idx) {
+        return STATE.selectedStep && STATE.selectedStep.trackId === tid && STATE.selectedStep.stepIndex === idx;
+    }
+
+    function toggleMute(tid) { STATE.muted[tid] = !STATE.muted[tid]; renderUI(); }
+    function toggleSolo(tid) { STATE.soloed = STATE.soloed === tid ? null : tid; renderUI(); }
+    function toggleLock(tid) { STATE.locked[tid] = !STATE.locked[tid]; renderUI(); }
+
+    // --- GENERATOR (Updated for v3.4) ---
+    function generatePattern() {
+        const genre = document.getElementById('genreSelect').value;
+        const complexity = 0.4; // Fixed for now, could use slider
+
+        tracks.forEach(t => {
+            if(STATE.locked[t.id]) return;
+            
+            // Clear track
+            STATE.pattern[t.id] = new Array(64).fill(null);
+            
+            // Generate
+            const steps = STATE.steps;
+            for(let i=0; i<steps; i++) {
+                let hit = false;
+                let vel = 0.8;
+                
+                // --- GENRE LOGIC ---
+                if (genre === 'lofi') {
+                    // Chill, sparse, swung
+                    if (t.id === 'kick' && (i%16===0 || i%16===10)) hit = Math.random()>0.2;
+                    if (t.id === 'snare' && (i%16===4 || i%16===12)) hit = true;
+                    if (t.id.includes('hat') && i%2===0) hit = Math.random()>0.3;
+                    if (t.id === 'chord' && i%16===0) hit = true;
+                }
+                else if (genre === 'house') {
+                    if (t.id === 'kick' && i%4===0) hit = true;
+                    if (t.id === 'hatO' && i%4===2) hit = true;
+                    if (t.id === 'clap' && i%16===4) hit = true;
+                }
+                else if (genre === 'dnb') {
+                    if (t.id === 'kick' && i%16===0) hit = true;
+                    if (t.id === 'kick' && i%16===10) hit = Math.random()>0.1;
+                    if (t.id === 'snare' && (i%16===4 || i%16===12)) hit = true;
+                    if (t.id === 'hatC') hit = true; 
+                }
+                else {
+                    // Default random filler
+                    if (Math.random() < 0.1) hit=true; 
+                }
+
+                if (hit) {
+                    STATE.pattern[t.id][i] = { vel: vel, pitch: 0, prob: 1 };
+                }
+            }
+        });
+        renderUI();
+    }
+
+
+    /* --- EVENT LISTENERS --- */
+
+    // Transport
+    document.getElementById('playBtn').onclick = () => { if(STATE.playing) stopPlayback(); else startPlayback(); };
+    document.getElementById('stopBtn').onclick = () => { stopPlayback(); STATE.currentStep=0; updatePlayhead(0); containerScroll(0); };
+    
+    // Globals
+    document.getElementById('bpmInput').oninput = (e) => { 
+        STATE.bpm = parseInt(e.target.value); 
+        document.getElementById('bpmVal').innerText = STATE.bpm; 
+    };
+    
+    document.getElementById('stepsSelect').onchange = (e) => {
+        STATE.steps = parseInt(e.target.value);
+        tracks.forEach(t => STATE.pattern[t.id] = STATE.pattern[t.id].concat(new Array(64).fill(null)).slice(0, 64)); // Resize safe
+        renderUI();
+    };
+
+    document.getElementById('genreSelect').onchange = (e) => {
+        const g = e.target.value;
+        const kSelect = document.getElementById('kitSelect');
+        kSelect.innerHTML = '';
+        KITS[g].forEach(k => {
+            const opt = document.createElement('option');
+            opt.innerText = k;
+            kSelect.appendChild(opt);
+        });
+        
+        // Auto-set BPM per genre
+        if (!document.getElementById('bpmLock').checked) {
+            const bpms = { house: 124, dnb: 174, lofi: 85, hiphop: 92, techno: 130 };
+            if(bpms[g]) {
+                STATE.bpm = bpms[g];
+                document.getElementById('bpmInput').value = STATE.bpm;
+                document.getElementById('bpmVal').innerText = STATE.bpm;
+            }
+        }
+    };
+    // Trigger initial kit population
+    document.getElementById('genreSelect').dispatchEvent(new Event('change'));
+
+    document.getElementById('genBtn').onclick = generatePattern;
+
+    // Swing & Humanize
+    document.getElementById('swingInput').oninput = (e) => {
+        STATE.swing = parseInt(e.target.value) / 100; // 0.0 - 0.8
+        document.getElementById('swingDisplay').innerText = e.target.value + '%';
+    };
+    document.getElementById('humanizeInput').oninput = (e) => {
+        STATE.humanize = parseInt(e.target.value) / 100; 
+        document.getElementById('humanizeDisplay').innerText = e.target.value + '%';
+    };
+
+    // Step Props
+    function updateSelectedStep(key, val) {
+        if (!STATE.selectedStep) return;
+        const s = STATE.pattern[STATE.selectedStep.trackId][STATE.selectedStep.stepIndex];
+        if(s) s[key] = parseFloat(val);
+    }
+
+    document.getElementById('stepVel').oninput = (e) => {
+        document.getElementById('valVel').innerText = e.target.value;
+        updateSelectedStep('vel', e.target.value);
+    };
+    document.getElementById('stepPitch').oninput = (e) => {
+        document.getElementById('valPitch').innerText = e.target.value;
+        updateSelectedStep('pitch', e.target.value);
+    };
+    document.getElementById('stepProb').oninput = (e) => {
+        document.getElementById('valProb').innerText = Math.round(e.target.value * 100) + '%';
+        updateSelectedStep('prob', e.target.value);
+    };
+    document.getElementById('btnDeleteStep').onclick = () => {
+        if(!STATE.selectedStep) return;
+        STATE.pattern[STATE.selectedStep.trackId][STATE.selectedStep.stepIndex] = null;
+        selectStep(null);
+        renderUI();
+    };
+
+
+    // Initialization
+    document.getElementById('startBtn').onclick = () => {
+        if(ctx.state === 'suspended') ctx.resume();
+        document.getElementById('overlay').style.display = 'none';
+        renderUI();
+    };
+
+</script>
+</body>
+</html>
