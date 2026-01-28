@@ -1,6 +1,6 @@
-# Gemini Studio - Drum Machine
+# FreakGen Architect - Drum Machine
 
-Welcome to the Gemini Studio Drum Machine project! This guide is designed to help new developers—even beginners—get started with contributing to this application, specifically when working alongside an AI Agentic IDE.
+Welcome to the FreakGen Architect Drum Machine project! This guide is designed to help new developers—even beginners—get started with contributing to this application, specifically when working alongside an AI Agentic IDE.
 
 ## 🚀 Project Overview
 

@@ -1,6 +1,6 @@
 import { writeTextFile, readTextFile, readDir, mkdir, BaseDirectory } from '@tauri-apps/plugin-fs';
 
-const FOLDER = 'GeminiBeats';
+const FOLDER = 'FreakGenBeats';
 
 // Helper to ensure folder exists
 const ensureFolder = async () => {

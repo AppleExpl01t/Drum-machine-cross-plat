@@ -1,7 +1,7 @@
 {
-  "name": "gemini-studio",
-  "version": "3.9.7",
-  "description": "Gemini Studio Architect v3.9.7 - Production Drum Machine",
+  "name": "freakgen-architect",
+  "version": "1.0.0",
+  "description": "FreakGen Architect - Production Drum Machine",
   "private": true,
   "dependencies": {
     "@capacitor/android": "^6.2.1",

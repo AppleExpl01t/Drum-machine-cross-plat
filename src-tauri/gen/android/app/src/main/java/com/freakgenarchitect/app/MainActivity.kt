@@ -1,4 +1,4 @@
-package com.geministudio.app
+package com.freakgenarchitect.app
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

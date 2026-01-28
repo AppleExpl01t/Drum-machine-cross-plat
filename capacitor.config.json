@@ -1,6 +1,6 @@
 {
-  "appId": "com.geministudio.app",
-  "appName": "FreakGen Drum machine",
+  "appId": "com.freakgenarchitect.app",
+  "appName": "FreakGen Architect",
   "webDir": "dist",
   "plugins": {
     "SplashScreen": {

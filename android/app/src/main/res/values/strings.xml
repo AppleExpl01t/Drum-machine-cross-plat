@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">FreakGen Drum machine</string>
-    <string name="title_activity_main">FreakGen Drum machine</string>
-    <string name="package_name">com.geministudio.app</string>
-    <string name="custom_url_scheme">com.geministudio.app</string>
+    <string name="app_name">FreakGen Architect</string>
+    <string name="title_activity_main">FreakGen Architect</string>
+    <string name="package_name">com.freakgenarchitect.app</string>
+    <string name="custom_url_scheme">com.freakgenarchitect.app</string>
 </resources>

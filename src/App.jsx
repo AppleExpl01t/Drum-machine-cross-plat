@@ -254,7 +254,7 @@ function App() {
                 }
             } catch (e) {
                 try {
-                    const data = localStorage.getItem('gemini_drum_' + name);
+                    const data = localStorage.getItem('freakgen_drum_' + name);
                     if (data) {
                         const p = JSON.parse(data);
                         commitPattern(p);
@@ -303,7 +303,7 @@ function App() {
         return (
             <div className="overlay">
                 <div style={{ textAlign: 'center' }}>
-                    <h1 style={{ color: 'var(--primary)', marginBottom: 20 }}>FREAKGEN DRUM MACHINE v3.9.7</h1>
+                    <h1 style={{ color: 'var(--primary)', marginBottom: 20 }}>FREAKGEN ARCHITECT v1.0.0</h1>
                     <button className="big-btn" onClick={handleStart}>INITIALIZE SYSTEM</button>
                 </div>
             </div>
@@ -323,7 +323,7 @@ function App() {
         >
             {/* Top Bar with Logo and Settings */}
             <div className="top-bar">
-                <span className="logo">FREAKGEN v3.9.7</span>
+                <span className="logo">FREAKGEN ARCHITECT v1.0.0</span>
                 <SettingsMenu
                     uiScale={uiScale}
                     onUiScaleChange={setUiScale}
